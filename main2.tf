@@ -6,14 +6,22 @@ provider "aws" {
 resource "aws_instance" "web" {
   ami           = "ami-0d94353f7bad10668"
   instance_type = "t2.micro"
-  user_data     = "${file("user.data.txt")}"
+  user_data     = "${file("user.data.sh")}"
 
   tags = {
     "Terraform" = "true"
   }
 }
-resource "aws_s3_bucket" "my-new-S3-bucket" {
-  bucket = "my-new-tf-jenkins-bucket-emaca2312"
+
+resource "aws_default_vpc" "default" {
+  tags = {
+    Name = "Default VPC"
+  }
+}
+
+
+resource "aws_s3_bucket" "bucket_tf" {
+  bucket = "tf-test-bucket-emaca2312"
 
   tags = {
     Name    = "My S3 Bucket"
@@ -21,32 +29,18 @@ resource "aws_s3_bucket" "my-new-S3-bucket" {
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "my-new-S3-bucket" {
-  bucket = aws_s3_bucket.my-new-S3-bucket.my-new-tf-jenkins-bucket-emaca2312
+resource "aws_s3_bucket_public_access_block" "bucket_tf" {
+  bucket = "tf-test-bucket-emaca2312"
 
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
-
-resource "aws_subnet" "variables-subnet" {
-  vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = "10.0.250.0/24"
-  availability_zone       = "us-east-1a"
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name      = "sub-variables-us-east-1a"
-    Terraform = "true"
-  }
-}
-
-
 resource "aws_security_group" "my-new-security-group" {
   name        = "jenkins_security_group"
   description = "Allow inbound traffic on tcp 22 and tcp 8080"
-  vpc_id      = aws_vpc.vpc.id
+  vpc_id      = "vpc-0ca271afb22e66917"
 
   ingress {
     description = "Allow 22 from my IP"
@@ -68,4 +62,9 @@ resource "aws_security_group" "my-new-security-group" {
     Name    = "web_server_inbound"
     Purpose = "my IP and internet access"
   }
+}
+
+resource "aws_network_interface_sg_attachment" "sg_attachment" {
+  security_group_id    = "sg-0e69906de8913f03c"
+  network_interface_id = "eni-0005d9c7925749a01"
 }
