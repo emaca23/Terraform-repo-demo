@@ -65,6 +65,6 @@ resource "aws_security_group" "my-new-security-group" {
 }
 
 resource "aws_network_interface_sg_attachment" "sg_attachment" {
-  security_group_id    = "sg-0e69906de8913f03c"
-  network_interface_id = "eni-0005d9c7925749a01"
+  security_group_id    = "sg-04580262e02aacfce"
+  network_interface_id = "eni-05cf8d39cc09c18c8"
 }
