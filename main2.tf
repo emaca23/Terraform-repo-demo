@@ -4,9 +4,10 @@ provider "aws" {
 }
 
 resource "aws_instance" "web" {
-  ami           = "ami-0d94353f7bad10668"
+  ami           = "ami-0d191299f2822b1fa"
   instance_type = "t2.micro"
-  user_data     = "${file("user.data.sh")}"
+  user_data     = "${file("user-data.sh")}"
+ 
 
   tags = {
     "Terraform" = "true"
@@ -65,6 +66,6 @@ resource "aws_security_group" "my-new-security-group" {
 }
 
 resource "aws_network_interface_sg_attachment" "sg_attachment" {
-  security_group_id    = "sg-04580262e02aacfce"
-  network_interface_id = "eni-05cf8d39cc09c18c8"
+   security_group_id    = "${aws_security_group.my-new-security-group.id}"
+   network_interface_id = "${aws_instance.web.primary_network_interface_id}"
 }
