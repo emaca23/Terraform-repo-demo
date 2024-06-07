@@ -167,6 +167,11 @@ resource "aws_instance" "web_server" {
   connection {
     user        = "ubuntu"
     private_key = tls_private_key.generate.private_key_pem
+
+
+    key_name = aws_key_pair.generate.key_name
+
+
     host        = self.public.ip
   }
 
@@ -181,6 +186,7 @@ resource "aws_instance" "web_server" {
       "sudo sh /tmp/assets/setup-web.sh",
     ]
   }
+
 }
 
 resource "aws_subnet" "variables-subnet" {
@@ -207,9 +213,12 @@ resource "local_file" "private_key_pem" {
   filename = "My_AWS_Key.pem"
 }
 
+
+
 resource "aws_key_pair" "generate" {
   key_name   = "My_AWS_Key"
   public_key = tls_private_key.generate.public_key_openssh
+
 
 
   lifecycle {
