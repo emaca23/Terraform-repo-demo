@@ -155,6 +155,7 @@ resource "aws_instance" "web_server" {
   subnet_id = aws_subnet.public_subnets["public_subnet_1"].id
   #vpc_security_group_ids = ["sg-0db48206c73ccafc5"]
   security_groups = [aws_security_group.vpc-ping.id, aws_security_group.ingress-ssh.id, aws_security_group.vpc-web.id]
+
   key_name        = aws_key_pair.generate.key_name
   
     tags = {
@@ -166,6 +167,12 @@ resource "aws_instance" "web_server" {
   connection {
     user        = "ubuntu"
     private_key = tls_private_key.generate.private_key_pem
+
+  key_name        = aws_key_pair.generate.key_name
+  connection {
+    user        = "ubuntu"
+    private_key = tls_private_key.generate.private_key_pem
+
     host        = self.public_ip
 
   }
@@ -182,7 +189,16 @@ resource "aws_instance" "web_server" {
       "sudo sh /tmp/assets/setup-web.sh",
     ]
   }
+
   
+
+
+  tags = {
+    Name  = local.server_name
+    Owner = local.team
+    App   = local.application
+  }
+
 }
 resource "aws_subnet" "variables-subnet" {
   vpc_id                  = aws_vpc.vpc.id
@@ -195,17 +211,30 @@ resource "aws_subnet" "variables-subnet" {
     Terraform = "true"
   }
 }
+
 resource "tls_private_key" "generate" {
+
+resource "tls_private_key" "generate" {
+
   algorithm = "RSA"
 }
 
 resource "local_file" "private_key_pem" {
+
   content  = tls_private_key.generate.private_key_pem
   filename = "My_AWS_Key.pem"
 }
 resource "aws_key_pair" "generate" {
   key_name   = "My_AWS_Key"
   public_key = tls_private_key.generate.public_key_openssh
+
+  content  = tls_private_key.generate.private_key_pem
+  filename = "My_AWS_Key.pem"
+}
+resource "aws_key_pair" "generate" {
+  key_name   = "My_AWS_Key"
+  public_key = tls_private_key.generate.public_key_openssh
+
 
   lifecycle {
     ignore_changes = [key_name]
@@ -282,4 +311,6 @@ resource "aws_security_group" "vpc-ping" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
 }
+
