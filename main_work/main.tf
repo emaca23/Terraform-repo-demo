@@ -156,42 +156,7 @@ resource "aws_instance" "web_server" {
   #vpc_security_group_ids = ["sg-0db48206c73ccafc5"]
   security_groups = [aws_security_group.vpc-ping.id, aws_security_group.ingress-ssh.id, aws_security_group.vpc-web.id]
 
-  key_name        = aws_key_pair.generate.key_name
-  
-    tags = {
-    Name  = local.server_name
-    Owner = local.team
-    App   = local.application
-  }
-  
-  connection {
-    user        = "ubuntu"
-    private_key = tls_private_key.generate.private_key_pem
-
-  key_name        = aws_key_pair.generate.key_name
-  connection {
-    user        = "ubuntu"
-    private_key = tls_private_key.generate.private_key_pem
-
-    host        = self.public_ip
-
-  }
-
-  # Leave the first part of the block unchanged and create our `local-exec` provisioner
-  provisioner "local-exec" {
-    command = "chmod 600 ${local_file.private_key_pem.filename}"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "sudo rm -rf /tmp",
-      "sudo git clone https://github.com/hashicorp/demo-terraform-101 /tmp",
-      "sudo sh /tmp/assets/setup-web.sh",
-    ]
-  }
-
-  
-
+  key_name = aws_key_pair.generate.key_name
 
   tags = {
     Name  = local.server_name
@@ -199,7 +164,25 @@ resource "aws_instance" "web_server" {
     App   = local.application
   }
 
+  connection {
+    user        = "ubuntu"
+    private_key = tls_private_key.generate.private_key_pem
+    host        = self.public.ip
+  }
+
+  # Leave the first part of the block unchanged and create our `local-exec` provisioner
+  provisioner "local-exec" {
+    command = "chmod 600 ${local_file.private_key_pem.filename}"
+  }
+  provisioner "remote-exec" {
+    inline = [
+      "sudo rm -rf /tmp",
+      "sudo git clone https://github.com/hashicorp/demo-terraform-101 /tmp",
+      "sudo sh /tmp/assets/setup-web.sh",
+    ]
+  }
 }
+
 resource "aws_subnet" "variables-subnet" {
   vpc_id                  = aws_vpc.vpc.id
   cidr_block              = var.variables_sub_cidr
@@ -212,7 +195,6 @@ resource "aws_subnet" "variables-subnet" {
   }
 }
 
-resource "tls_private_key" "generate" {
 
 resource "tls_private_key" "generate" {
 
@@ -224,13 +206,7 @@ resource "local_file" "private_key_pem" {
   content  = tls_private_key.generate.private_key_pem
   filename = "My_AWS_Key.pem"
 }
-resource "aws_key_pair" "generate" {
-  key_name   = "My_AWS_Key"
-  public_key = tls_private_key.generate.public_key_openssh
 
-  content  = tls_private_key.generate.private_key_pem
-  filename = "My_AWS_Key.pem"
-}
 resource "aws_key_pair" "generate" {
   key_name   = "My_AWS_Key"
   public_key = tls_private_key.generate.public_key_openssh
@@ -311,6 +287,4 @@ resource "aws_security_group" "vpc-ping" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
 }
-
