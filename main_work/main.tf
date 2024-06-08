@@ -163,6 +163,7 @@ resource "aws_instance" "web_server" {
     Owner = local.team
     App   = local.application
   }
+
 }
 
 connection {
@@ -170,19 +171,27 @@ connection {
   private_key = tls_private_key.generate.private_key_pem
 
   key_name = aws_key_pair.generate.key_name
+
+
+
   connection {
     user        = "ubuntu"
     private_key = tls_private_key.generate.private_key_pem
 
+
     host = self.public_ip
 
+
+    key_name = aws_key_pair.generate.key_name
+
+
+    host        = self.public.ip
   }
 
   # Leave the first part of the block unchanged and create our `local-exec` provisioner
   provisioner "local-exec" {
     command = "chmod 600 ${local_file.private_key_pem.filename}"
   }
-
   provisioner "remote-exec" {
     inline = [
       "sudo rm -rf /tmp",
@@ -194,6 +203,7 @@ connection {
 
 
 
+
   tags = {
     Name  = local.server_name
     Owner = local.team
@@ -201,6 +211,7 @@ connection {
   }
 
 }
+
 resource "aws_subnet" "variables-subnet" {
   vpc_id                  = aws_vpc.vpc.id
   cidr_block              = var.variables_sub_cidr
@@ -213,7 +224,6 @@ resource "aws_subnet" "variables-subnet" {
   }
 }
 
-resource "tls_private_key" "generate" {
 
   algorithm = "RSA"
 }
@@ -223,15 +233,26 @@ resource "local_file" "private_key_pem" {
   content  = tls_private_key.generate.private_key_pem
   filename = "My_AWS_Key.pem"
 }
-resource "aws_key_pair" "generate" {
-  key_name   = "My_AWS_Key"
-  public_key = tls_private_key.generate.public_key_openssh
+
 
 }
 
 
 lifecycle {
   ignore_changes = [key_name]
+
+
+
+resource "aws_key_pair" "generate" {
+  key_name   = "My_AWS_Key"
+  public_key = tls_private_key.generate.public_key_openssh
+
+
+
+  lifecycle {
+    ignore_changes = [key_name]
+  }
+
 }
 
 # Security Groups
@@ -304,6 +325,4 @@ resource "aws_security_group" "vpc-ping" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
 }
-
