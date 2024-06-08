@@ -1,4 +1,10 @@
 terraform {
+  backend "s3" {
+    bucket = "my-terraform-state-ejc"
+    key    = "path/to/my/key"
+    region = "us-east-1"
+  }
+  
   required_version = ">= 0.15.0"
 
   required_providers {
@@ -6,8 +12,8 @@ terraform {
       source = "hashicorp/aws"
 
       version = "~> 5.0"
-
     }
+
     http = {
       source  = "hashicorp/http"
       version = "2.1.0"
@@ -28,3 +34,5 @@ terraform {
     }
   }
 }
+
+  
