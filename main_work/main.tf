@@ -156,24 +156,25 @@ resource "aws_instance" "web_server" {
   #vpc_security_group_ids = ["sg-0db48206c73ccafc5"]
   security_groups = [aws_security_group.vpc-ping.id, aws_security_group.ingress-ssh.id, aws_security_group.vpc-web.id]
 
-  key_name        = aws_key_pair.generate.key_name
-  
-    tags = {
+  key_name = aws_key_pair.generate.key_name
+
+  tags = {
     Name  = local.server_name
     Owner = local.team
     App   = local.application
   }
-  
+}
+
+connection {
+  user        = "ubuntu"
+  private_key = tls_private_key.generate.private_key_pem
+
+  key_name = aws_key_pair.generate.key_name
   connection {
     user        = "ubuntu"
     private_key = tls_private_key.generate.private_key_pem
 
-  key_name        = aws_key_pair.generate.key_name
-  connection {
-    user        = "ubuntu"
-    private_key = tls_private_key.generate.private_key_pem
-
-    host        = self.public_ip
+    host = self.public_ip
 
   }
 
@@ -190,7 +191,7 @@ resource "aws_instance" "web_server" {
     ]
   }
 
-  
+
 
 
   tags = {
@@ -214,8 +215,6 @@ resource "aws_subnet" "variables-subnet" {
 
 resource "tls_private_key" "generate" {
 
-resource "tls_private_key" "generate" {
-
   algorithm = "RSA"
 }
 
@@ -228,17 +227,11 @@ resource "aws_key_pair" "generate" {
   key_name   = "My_AWS_Key"
   public_key = tls_private_key.generate.public_key_openssh
 
-  content  = tls_private_key.generate.private_key_pem
-  filename = "My_AWS_Key.pem"
 }
-resource "aws_key_pair" "generate" {
-  key_name   = "My_AWS_Key"
-  public_key = tls_private_key.generate.public_key_openssh
 
 
-  lifecycle {
-    ignore_changes = [key_name]
-  }
+lifecycle {
+  ignore_changes = [key_name]
 }
 
 # Security Groups
