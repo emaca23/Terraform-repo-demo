@@ -1,0 +1,20 @@
+resource "aws_launch_template" "project_2" {
+  name = "p2"
+  image_id = "ami-00beae93a2d981137"
+  instance_type = "t2.micro"
+  user_data = "${file("user-data.sh")}"
+  vpc_security_group_ids = "${aws_security_group.my-new-security-group.id}"
+  subnet_id = ["subnet-003ffee4f109276c5", "subnet-018af8d8fe5ff564c"]
+  
+    tags = {
+      Name = "test"
+    }
+
+resource "aws_autoscaling_group" "p2_demo" {
+  availability_zones = ["us-east-1a"]
+  desired_capacity   = 2
+  max_size           = 5
+  min_size           = 2
+  launch_configuration      = aws_launch_template.project_2.p2
+  vpc_zone_identifier       = ["subnet-003ffee4f109276c5", "subnet-018af8d8fe5ff564c"]
+}
