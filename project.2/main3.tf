@@ -3,7 +3,7 @@ provider "aws" {}
 
 resource "aws_launch_template" "project_2" {
   name          = "project2"
-  image_id      = "ami-00beae93a2d981137"
+  image_id      = var.ami_name
   instance_type = "t2.micro"
   user_data     = filebase64("user_data.sh")
  
@@ -42,8 +42,8 @@ resource "aws_s3_bucket" "bucket_p2" {
 
 resource "aws_security_group" "my-new-security-group" {
   name        = "p2_security_group"
-  description = "Allow inbound traffic on tcp 22 and tcp 8080"
-  vpc_id      = "vpc-0ca271afb22e66917"
+  description = "Allow inbound traffic on all ports"
+  vpc_id      = var.vpc_name
 
   ingress {
     description = "Allow all from public"
@@ -52,26 +52,18 @@ resource "aws_security_group" "my-new-security-group" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  #ingress {
-   # description = "Allow all from public 443"
-   # from_port   = 443
-   # to_port     = 443
-   # protocol    = "tcp"
-   # cidr_blocks = ["0.0.0.0/0"]
- # }
- 
-   # ingress {
-   # description = "Allow all from public 22"
-   # from_port   = 22
-   # to_port     = 22
-   # protocol    = "tcp"
-   # cidr_blocks = ["73.229.203.54/32"]
- # }
   
+  egress {
+    description = "Allow all outbound"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
   
 
   tags = {
-    Name    = "web_server_inbound"
-    Purpose = "80 and 443 inbound"
+    Name    = "web_server"
+    Purpose = "all traffic allowed"
   }
 }
