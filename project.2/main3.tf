@@ -31,14 +31,6 @@ resource "aws_autoscaling_group" "p2_demo" {
   }
 }
 
-resource "aws_s3_bucket" "bucket_p2" {
-  bucket = "p2-test-bucket-emaca2312"
-
-  tags = {
-    Name    = "My S3 Bucket"
-    Purpose = "Project bucket for terraform_asg"
-  }
-}
 
 resource "aws_security_group" "my-new-security-group" {
   name        = "p2_security_group"
